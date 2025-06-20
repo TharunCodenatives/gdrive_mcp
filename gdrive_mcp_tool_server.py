@@ -222,7 +222,7 @@ class MCPOAuthManager:
             
             # Check if token is in our store and not expired
             if token in self.access_tokens:
-                token_info = self.access_tokens[token]
+                token_info = self.access_tokens[token] 
                 if datetime.now() < token_info["expires_at"]:
                     return {
                         "client_id": payload["sub"],
