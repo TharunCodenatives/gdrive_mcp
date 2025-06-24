@@ -9,7 +9,7 @@ Complete testing flow for the Google Drive MCP Tool Server with OAuth 2.1 author
 cd gdrive-mcp
 python gdrive_mcp_tool_server.py
 ```
-Server runs on `http://192.168.86.22:8000`
+Server runs on `http://192.168.86.22:3007`
 
 ---
 
@@ -17,7 +17,7 @@ Server runs on `http://192.168.86.22:8000`
 
 ### **Request 1: Server Health Check**
 - **Method:** `GET`
-- **URL:** `http://192.168.86.22:8000/health`
+- **URL:** `http://192.168.86.22:3007/health`
 - **Expected Response:**
 ```json
 {
@@ -29,14 +29,14 @@ Server runs on `http://192.168.86.22:8000`
 
 ### **Request 2: MCP Authorization Server Metadata Discovery**
 - **Method:** `GET` 
-- **URL:** `http://192.168.86.22:8000/.well-known/oauth-authorization-server`
+- **URL:** `http://192.168.86.22:3007/.well-known/oauth-authorization-server`
 - **Expected Response:**
 ```json
 {
-  "issuer": "http://192.168.86.22:8000",
-  "authorization_endpoint": "http://192.168.86.22:8000/authorize",
-  "token_endpoint": "http://192.168.86.22:8000/token",
-  "registration_endpoint": "http://192.168.86.22:8000/register",
+  "issuer": "http://192.168.86.22:3007",
+  "authorization_endpoint": "http://192.168.86.22:3007/authorize",
+  "token_endpoint": "http://192.168.86.22:3007/token",
+  "registration_endpoint": "http://192.168.86.22:3007/register",
   "scopes_supported": ["gdrive:read", "gdrive:write"],
   "response_types_supported": ["code"],
   "grant_types_supported": ["authorization_code", "client_credentials"]
@@ -47,7 +47,7 @@ Server runs on `http://192.168.86.22:8000`
 
 ### **Request 3: Test Unauthorized Access (Should Fail)**
 - **Method:** `POST`
-- **URL:** `http://192.168.86.22:8000/tool/create_folder`
+- **URL:** `http://192.168.86.22:3007/tool/create_folder`
 - **Headers:**
 ```
 Content-Type: application/json
@@ -70,7 +70,7 @@ Content-Type: application/json
 
 ### **Request 4: Register MCP OAuth Client**
 - **Method:** `POST`
-- **URL:** `http://192.168.86.22:8000/register`
+- **URL:** `http://192.168.86.22:3007/register`
 - **Headers:**
 ```
 Content-Type: application/json
@@ -79,7 +79,7 @@ Content-Type: application/json
 ```json
 {
   "client_name": "Postman MCP Client",
-  "redirect_uris": ["http://localhost:3000/callback"],
+  "redirect_uris": ["http://localhost:3007/callback"],
   "scope": "gdrive:read gdrive:write"
 }
 ```
@@ -89,7 +89,7 @@ Content-Type: application/json
   "client_id": "client_abc123xyz",
   "client_secret": null,
   "client_name": "Postman MCP Client",
-  "redirect_uris": ["http://localhost:3000/callback"]
+  "redirect_uris": ["http://localhost:3007/callback"]
 }
 ```
 **📝 Copy the `client_id` for next step!**
@@ -98,7 +98,7 @@ Content-Type: application/json
 
 ### **Request 5: Get MCP Access Token**
 - **Method:** `POST`
-- **URL:** `http://192.168.86.22:8000/token`
+- **URL:** `http://192.168.86.22:3007/token`
 - **Headers:**
 ```
 Content-Type: application/json
@@ -126,7 +126,7 @@ Content-Type: application/json
 
 ### **Tool 1: Create Folder**
 - **Method:** `POST`
-- **URL:** `http://192.168.86.22:8000/tool/create_folder`
+- **URL:** `http://192.168.86.22:3007/tool/create_folder`
 - **Headers:**
 ```
 Content-Type: application/json
@@ -159,7 +159,7 @@ Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
 
 ### **Tool 2: List Directory**
 - **Method:** `POST`
-- **URL:** `http://192.168.86.22:8000/tool/list_directory`
+- **URL:** `http://192.168.86.22:3007/tool/list_directory`
 - **Headers:**
 ```
 Content-Type: application/json
@@ -203,7 +203,7 @@ Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
 
 ### **Tool 3: Navigate Path**
 - **Method:** `POST`
-- **URL:** `http://192.168.86.22:8000/tool/navigate_path`
+- **URL:** `http://192.168.86.22:3007/tool/navigate_path`
 - **Headers:**
 ```
 Content-Type: application/json
@@ -242,7 +242,7 @@ Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
 
 ### **Tool 4: Read File**
 - **Method:** `POST`
-- **URL:** `http://192.168.86.22:8000/tool/read_file`
+- **URL:** `http://192.168.86.22:3007/tool/read_file`
 - **Headers:**
 ```
 Content-Type: application/json
@@ -277,7 +277,7 @@ Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
 
 ### **Tool 5: Write File**
 - **Method:** `POST`
-- **URL:** `http://192.168.86.22:8000/tool/write_file`
+- **URL:** `http://192.168.86.22:3007/tool/write_file`
 - **Headers:**
 ```
 Content-Type: application/json
@@ -315,7 +315,7 @@ Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
 
 ### **Environment Variables Setup:**
 Create a Postman environment called "MCP Google Drive" with:
-- `baseUrl` = `http://192.168.86.22:8000`
+- `baseUrl` = `http://192.168.86.22:3007`
 - `clientId` = (will be set automatically)
 - `accessToken` = (will be set automatically)
 
@@ -408,7 +408,7 @@ pm.test("Response includes authorized client", function () {
 
 1. **"Connection refused"**
    - Server not running
-   - Wrong IP/port (check it's 192.168.86.22:8000)
+   - Wrong IP/port (check it's 192.168.86.22:3007)
 
 2. **"Authorization required"**
    - Missing `Authorization` header

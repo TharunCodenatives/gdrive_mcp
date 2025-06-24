@@ -26,7 +26,7 @@ pip install -r requirements.txt
 python gdrive_mcp_tool_server.py
 ```
 
-The server will start on `http://localhost:8000`
+The server will start on `http://localhost:3007`
 
 ## API Endpoints
 
@@ -59,7 +59,7 @@ All tool endpoints require OAuth 2.1 Bearer token authorization:
 
 #### 1. Dynamic Client Registration
 ```bash
-curl -X POST "http://localhost:8000/register" \
+curl -X POST "http://localhost:3007/register" \
      -H "Content-Type: application/json" \
      -d '{
        "client_name": "My MCP Client",
@@ -75,12 +75,12 @@ code_verifier=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-43)
 code_challenge=$(echo -n $code_verifier | sha256sum | xxd -r -p | base64 | tr -d "=+/" | cut -c1-43)
 
 # Authorization URL (user visits this in browser)
-http://localhost:8000/authorize?client_id=client_abc123&response_type=code&redirect_uri=http://localhost:3000/callback&code_challenge=$code_challenge&code_challenge_method=S256&scope=gdrive:read%20gdrive:write
+http://localhost:3007/authorize?client_id=client_abc123&response_type=code&redirect_uri=http://localhost:3000/callback&code_challenge=$code_challenge&code_challenge_method=S256&scope=gdrive:read%20gdrive:write
 ```
 
 #### 3. Token Exchange
 ```bash
-curl -X POST "http://localhost:8000/token" \
+curl -X POST "http://localhost:3007/token" \
      -H "Content-Type: application/json" \
      -d '{
        "grant_type": "authorization_code",
@@ -97,7 +97,7 @@ All tool endpoints require a Bearer token in the Authorization header:
 
 #### Create Folder
 ```bash
-curl -X POST "http://localhost:8000/tool/create_folder" \
+curl -X POST "http://localhost:3007/tool/create_folder" \
      -H "Content-Type: application/json" \
      -H "Authorization: Bearer your_access_token_here" \
      -d '{"name": "My New Folder", "parent_id": "root"}'
@@ -105,7 +105,7 @@ curl -X POST "http://localhost:8000/tool/create_folder" \
 
 #### List Directory
 ```bash
-curl -X POST "http://localhost:8000/tool/list_directory" \
+curl -X POST "http://localhost:3007/tool/list_directory" \
      -H "Content-Type: application/json" \
      -H "Authorization: Bearer your_access_token_here" \
      -d '{"folder_id": "root", "max_results": 50}'
@@ -113,7 +113,7 @@ curl -X POST "http://localhost:8000/tool/list_directory" \
 
 #### Navigate Path
 ```bash
-curl -X POST "http://localhost:8000/tool/navigate_path" \
+curl -X POST "http://localhost:3007/tool/navigate_path" \
      -H "Content-Type: application/json" \
      -H "Authorization: Bearer your_access_token_here" \
      -d '{"path": "/Documents"}'
@@ -121,7 +121,7 @@ curl -X POST "http://localhost:8000/tool/navigate_path" \
 
 #### Read File
 ```bash
-curl -X POST "http://localhost:8000/tool/read_file" \
+curl -X POST "http://localhost:3007/tool/read_file" \
      -H "Content-Type: application/json" \
      -H "Authorization: Bearer your_access_token_here" \
      -d '{"file_id": "file1", "encoding": "utf-8"}'
@@ -129,7 +129,7 @@ curl -X POST "http://localhost:8000/tool/read_file" \
 
 #### Write File
 ```bash
-curl -X POST "http://localhost:8000/tool/write_file" \
+curl -X POST "http://localhost:3007/tool/write_file" \
      -H "Content-Type: application/json" \
      -H "Authorization: Bearer your_access_token_here" \
      -d '{"name": "test.txt", "content": "Hello World!", "parent_id": "root"}'
@@ -176,11 +176,11 @@ The current mock implementation provides the exact interface structure needed fo
 
 ### Running in Development Mode
 ```bash
-uvicorn gdrive_mcp_tool_server:app --reload --host 0.0.0.0 --port 8000
+uvicorn gdrive_mcp_tool_server:app --reload --host 0.0.0.0 --port 3007
 ```
 
 ### Testing
-Visit `http://localhost:8000/docs` for interactive API testing with Swagger UI.
+Visit `http://localhost:3007/docs` for interactive API testing with Swagger UI.
 
 ## Architecture
 

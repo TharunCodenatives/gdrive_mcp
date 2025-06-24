@@ -9,7 +9,7 @@ from typing import Dict, Optional
 class MCPOAuthClient:
     """Simple OAuth 2.1 client for testing MCP server"""
     
-    def __init__(self, server_base_url: str = "http://localhost:8000"):
+    def __init__(self, server_base_url: str = "http://localhost:3007"):
         self.server_base_url = server_base_url
         self.client_id: Optional[str] = None
         self.access_token: Optional[str] = None
@@ -156,7 +156,7 @@ def main():
     # Test server metadata discovery
     print("\n📋 Testing server metadata discovery...")
     try:
-        response = requests.get("http://localhost:8000/.well-known/oauth-authorization-server")
+        response = requests.get("http://localhost:3007/.well-known/oauth-authorization-server")
         if response.status_code == 200:
             metadata = response.json()
             print("✅ Server metadata retrieved successfully")

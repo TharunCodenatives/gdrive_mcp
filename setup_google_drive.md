@@ -27,7 +27,7 @@ This guide will help you set up Google Drive API credentials for the MCP server.
 ### For Production/Server:
 1. Choose "Web application" instead
 2. Add authorized redirect URIs:
-   - `http://localhost:8000/oauth/callback` (for local testing)
+   - `http://localhost:3007/oauth/callback` (for local testing)
    - Your production callback URL
 3. Download and rename to `credentials.json`
 
@@ -43,7 +43,7 @@ USE_REAL_GOOGLE_DRIVE_API=true
 
 # MCP Server Configuration  
 MCP_SERVER_HOST=0.0.0.0
-MCP_SERVER_PORT=8000
+MCP_SERVER_PORT=3007
 ```
 
 ## Step 5: First-Time Authentication
@@ -67,7 +67,7 @@ This will:
 python gdrive_mcp_tool_server.py
 
 # Test with Postman or curl
-curl -X POST "http://localhost:8000/tool/list_directory" \
+curl -X POST "http://localhost:3007/tool/list_directory" \
      -H "Authorization: Bearer YOUR_MCP_TOKEN" \
      -H "Content-Type: application/json" \
      -d '{"folder_id": "root"}'
