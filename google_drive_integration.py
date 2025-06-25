@@ -46,9 +46,13 @@ class GoogleDriveAPIClient:
             creds = None
             token_file = f"{user_id}_{self.token_file}"
             
-            # Load existing token
+            # Load existing token - try both prefixed and non-prefixed versions
             if os.path.exists(token_file):
                 with open(token_file, 'rb') as token:
+                    creds = pickle.load(token)
+            elif os.path.exists(self.token_file):
+                # Fallback to non-prefixed token file
+                with open(self.token_file, 'rb') as token:
                     creds = pickle.load(token)
             
             # If no valid credentials, authenticate

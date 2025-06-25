@@ -742,17 +742,6 @@ async def navigate_path_endpoint(request: NavigatePathRequest, token_info: Dict[
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/tool/read_file")
-async def read_file_endpoint(request: ReadFileRequest, token_info: Dict[str, Any] = Depends(validate_token)):
-    """Read content from a Google Drive file (requires authorization)"""
-    try:
-        result = gdrive_tool.read_file(request.file_id, request.encoding)
-        result["authorized_client"] = token_info["client_id"]
-        return result
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
 @app.post("/tool/write_file")
 async def write_file_endpoint(request: WriteFileRequest, token_info: Dict[str, Any] = Depends(validate_token)):
     """Write content to a Google Drive file (requires authorization)"""
@@ -763,6 +752,17 @@ async def write_file_endpoint(request: WriteFileRequest, token_info: Dict[str, A
             request.file_id, 
             request.parent_id
         )
+        result["authorized_client"] = token_info["client_id"]
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/tool/read_file")
+async def read_file_endpoint(request: ReadFileRequest, token_info: Dict[str, Any] = Depends(validate_token)):
+    """Read content from a Google Drive file (requires authorization)"""
+    try:
+        result = gdrive_tool.read_file(request.file_id, request.encoding)
         result["authorized_client"] = token_info["client_id"]
         return result
     except Exception as e:

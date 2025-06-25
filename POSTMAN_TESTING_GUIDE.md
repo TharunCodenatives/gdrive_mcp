@@ -11,6 +11,11 @@ python gdrive_mcp_tool_server.py
 ```
 Server runs on `http://192.168.86.22:3007`
 
+**✅ IMPORTANT: Server now works with REAL Google Drive API!**
+- No more mock responses
+- All operations interact with your actual Google Drive
+- Requires valid `credentials.json` and `token.pickle` files
+
 ---
 
 ## 📋 **Postman Collection Setup**
@@ -144,11 +149,11 @@ Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
 {
   "status": "success",
   "data": {
-    "folder_id": "folder_abc123",
+    "folder_id": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms",
     "name": "My Postman Test Folder",
     "parent_id": "root",
-    "created_at": "2025-06-16T...",
-    "web_view_link": "https://drive.google.com/drive/folders/folder_abc123"
+    "created_at": "2025-06-25T10:15:30.123Z",
+    "web_view_link": "https://drive.google.com/drive/folders/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms"
   },
   "message": "Folder 'My Postman Test Folder' created successfully",
   "authorized_client": "client_abc123xyz"
@@ -181,20 +186,17 @@ Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
     "folder_name": "My Drive",
     "contents": [
       {
-        "id": "folder1",
-        "name": "Documents",
+        "id": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms",
+        "name": "My Postman Test Folder",
         "type": "folder",
-        "size": null
-      },
-      {
-        "id": "file1", 
-        "name": "example.txt",
-        "type": "file",
-        "size": 1024
+        "size": null,
+        "modified_at": "2025-06-25T10:15:30.123Z",
+        "web_view_link": "https://drive.google.com/drive/folders/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms"
       }
     ],
-    "total_items": 6
+    "total_items": 1
   },
+  "message": "Listed 1 items from folder 'My Drive'",
   "authorized_client": "client_abc123xyz"
 }
 ```
@@ -212,7 +214,7 @@ Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
 - **Body (raw JSON):**
 ```json
 {
-  "path": "/Documents"
+  "path": "/My Postman Test Folder"
 }
 ```
 - **Expected Response:**
@@ -220,62 +222,20 @@ Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
 {
   "status": "success",
   "data": {
-    "path": "/Documents",
-    "folder_id": "folder1",
-    "folder_name": "Documents",
-    "breadcrumb": ["Documents"],
-    "contents": [
-      {
-        "id": "file3",
-        "name": "document.docx",
-        "type": "file",
-        "size": 2048
-      }
-    ]
+    "path": "/My Postman Test Folder",
+    "folder_id": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms",
+    "folder_name": "My Postman Test Folder",
+    "breadcrumb": ["My Postman Test Folder"],
+    "contents": []
   },
-  "message": "Successfully navigated to '/Documents'",
+  "message": "Successfully navigated to '/My Postman Test Folder'",
   "authorized_client": "client_abc123xyz"
 }
 ```
 
 ---
 
-### **Tool 4: Read File**
-- **Method:** `POST`
-- **URL:** `http://192.168.86.22:3007/tool/read_file`
-- **Headers:**
-```
-Content-Type: application/json
-Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
-```
-- **Body (raw JSON):**
-```json
-{
-  "file_id": "file1",
-  "encoding": "utf-8"
-}
-```
-- **Expected Response:**
-```json
-{
-  "status": "success",
-  "data": {
-    "file_id": "file1",
-    "name": "example.txt",
-    "content": "This is example file content.",
-    "size": 1024,
-    "encoding": "utf-8",
-    "mime_type": "text/plain",
-    "last_modified": "2025-06-16T..."
-  },
-  "message": "Successfully read file 'example.txt'",
-  "authorized_client": "client_abc123xyz"
-}
-```
-
----
-
-### **Tool 5: Write File**
+### **Tool 4: Write File**
 - **Method:** `POST`
 - **URL:** `http://192.168.86.22:3007/tool/write_file`
 - **Headers:**
@@ -287,7 +247,7 @@ Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
 ```json
 {
   "name": "postman-test-file.txt",
-  "content": "Hello from Postman MCP test!\n\nThis file was created via the MCP Google Drive server.",
+  "content": "Hello from Postman MCP test!\n\nThis file was created via the MCP Google Drive server with REAL Google Drive API.",
   "parent_id": "root"
 }
 ```
@@ -296,15 +256,51 @@ Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
 {
   "status": "success",
   "data": {
-    "file_id": "file_abc123",
+    "file_id": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms",
     "name": "postman-test-file.txt",
     "size": 98,
     "operation": "created",
     "parent_id": "root",
-    "created_at": "2025-06-16T...",
-    "web_view_link": "https://drive.google.com/file/d/file_abc123/view"
+    "created_at": "2025-06-25T10:16:45.678Z",
+    "web_view_link": "https://drive.google.com/file/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/view"
   },
   "message": "Successfully created file 'postman-test-file.txt'",
+  "authorized_client": "client_abc123xyz"
+}
+```
+**📝 Copy the `file_id` for the next step!**
+
+---
+
+### **Tool 5: Read File**
+- **Method:** `POST`
+- **URL:** `http://192.168.86.22:3007/tool/read_file`
+- **Headers:**
+```
+Content-Type: application/json
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+```
+- **Body (raw JSON):**
+```json
+{
+  "file_id": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms",
+  "encoding": "utf-8"
+}
+```
+- **Expected Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "file_id": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms",
+    "name": "postman-test-file.txt",
+    "content": "Hello from Postman MCP test!\n\nThis file was created via the MCP Google Drive server with REAL Google Drive API.",
+    "size": 98,
+    "encoding": "utf-8",
+    "mime_type": "text/plain",
+    "last_modified": "2025-06-25T10:16:45.678Z"
+  },
+  "message": "Successfully read file 'postman-test-file.txt'",
   "authorized_client": "client_abc123xyz"
 }
 ```
@@ -436,9 +432,10 @@ python gdrive_mcp_tool_server.py
 ## 📝 **Notes**
 
 - **Token Lifetime:** 30 minutes (1800 seconds)
-- **Mock Mode:** Server works without Google Drive credentials
-- **Real Mode:** Add `credentials.json` for actual Google Drive operations
+- **✅ REAL Google Drive API:** Server now works with actual Google Drive operations
+- **Authentication:** Requires valid `credentials.json` and `token.pickle` files
 - **All endpoints** require proper Authorization header except health check and metadata
+- **File Operations:** Write file comes before read file for logical testing flow
 
 ---
 
@@ -450,5 +447,4 @@ Your MCP Google Drive server is working correctly if:
 - ✅ Unauthorized requests are properly rejected
 - ✅ Responses include `authorized_client` field
 - ✅ Token validation works correctly
-
-**Happy Testing!** 🚀 
+- ✅ **Real Google Drive operations work** (no mock responses)
