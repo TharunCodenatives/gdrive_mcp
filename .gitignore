@@ -1,0 +1,12 @@
+node_modules/
+build/
+.env
+*.log
+.DS_Store
+.idea/
+.vscode/
+TS-MCP.md
+db.json
+dailyupdate.md
+credentials.json
+token.pickle
