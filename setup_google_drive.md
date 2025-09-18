@@ -55,7 +55,6 @@ MCP_SERVER_PORT=3007
 For the first run, you'll need to authenticate:
 
 ```bash
-cd gdrive-mcp
 python auth_setup.py
 ```
 
