@@ -23,6 +23,10 @@ This guide will help you set up Google Drive API credentials for the MCP server.
 4. Name it "MCP Google Drive Client"
 5. Download the JSON file
 6. Rename it to `credentials.json` and place in `gdrive-mcp/` folder
+7. Add Test Users (Important for unverified apps):
+   - Go to APIs & Services → OAuth consent screen → audience → Test users → Add users
+   - Enter your Gmail address (e.g., `your_email@gmail.com`)
+   - Only these users can authenticate during testing
 
 ### For Production/Server:
 1. Choose "Web application" instead
