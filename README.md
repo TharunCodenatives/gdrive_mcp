@@ -14,14 +14,35 @@ A FastAPI server that exposes MCP-compatible tools for Google Drive operations w
 - **Modular Design**: Easy to replace mock logic with actual Google Drive API calls
 - **FastAPI Documentation**: Automatic API documentation at `/docs`
 
+## Python Version Dependencies
+
+- **Working**: Python 3.11, Python 3.12
+- **Not Working**: Python 3.13
+    - **Reason**: pydantic-core does not have pre-built wheels for Python 3.13.
+    - Installing on 3.13 requires Rust compiler to build pydantic-core from source.
+    - **Recommended**: Use Python 3.11 or 3.12 for seamless installation with pip install -r requirements.txt.
+
 ## Installation
 
-1. Install dependencies:
+1. Clone the repo and navigate into it:
+```bash
+git clone <repo_url>
+cd gdrive-mcp-main
+```
+
+2. Create virtual environment (recommended):
+```bash
+python3.12 -m venv venv
+source venv/bin/activate  # Linux/macOS
+venv\Scripts\activate     # Windows
+```
+
+3. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-2. Run the server:
+4. Run the server:
 ```bash
 python gdrive_mcp_tool_server.py
 ```
