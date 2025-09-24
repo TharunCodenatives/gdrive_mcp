@@ -1,7 +1,7 @@
 # Google Drive MCP Tool Server
 
 This project provides a **Model Context Protocol (MCP)** server for interacting with **Google Drive**.  
-It uses [`fastmcp`]([https://github.com/modelcontextprotocol/python-sdk]) as the MCP server framework and exposes tools for common Drive operations such as:
+It uses [`fastmcp`](https://github.com/modelcontextprotocol/python-sdk) as the MCP server framework and exposes tools for common Drive operations such as:
 
 - Creating folders
 - Listing directory contents
