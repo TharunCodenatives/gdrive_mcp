@@ -1,18 +1,20 @@
 # Google Drive MCP Tool Server
 
-A FastAPI server that exposes MCP-compatible tools for Google Drive operations with OAuth 2.1 authorization. Currently implements mock responses that can be easily replaced with actual Google Drive API calls.
+This project provides a **Model Context Protocol (MCP)** server for interacting with **Google Drive**.  
+It uses [`fastmcp`](https://pypi.org/project/mcp-server-fastmcp/) as the MCP server framework and exposes tools for common Drive operations such as:
 
-## Features
+- Creating folders
+- Listing directory contents
+- Navigating paths
+- Writing files
+- Reading files
 
-- **MCP-Compatible**: Designed to work with Model Context Protocol
-- **OAuth 2.1 Authorization**: Full OAuth 2.1 implementation with PKCE support
-- **5 Core Operations**: Create folders, list directories, navigate paths, read files, and write files
-- **Mock Implementation**: All operations return realistic mock data for testing
-- **Authorization Server Metadata**: RFC8414 compliant metadata discovery
-- **Dynamic Client Registration**: RFC7591 compliant client registration
-- **Input Validation**: Uses Pydantic models for request validation
-- **Modular Design**: Easy to replace mock logic with actual Google Drive API calls
-- **FastAPI Documentation**: Automatic API documentation at `/docs`
+## 🚀 Features
+
+- ✅ Create folders inside Google Drive  
+- ✅ List contents of any folder  
+- ✅ Navigate to a path inside Google Drive  
+- ✅ Read and write files  
 
 ## Python Version Dependencies
 
@@ -27,7 +29,7 @@ A FastAPI server that exposes MCP-compatible tools for Google Drive operations w
 1. Clone the repo and navigate into it:
 ```bash
 git clone <repo_url>
-cd gdrive-mcp-main
+cd gdrive-mcp
 ```
 
 2. Create virtual environment (recommended):
@@ -44,168 +46,109 @@ pip install -r requirements.txt
 
 4. Run the server:
 ```bash
-python gdrive_mcp_tool_server.py
+uv run gdrive_mcp_server.py
 ```
 
-The server will start on `http://localhost:3007`
+The server will start on `http://127.0.0.1:8000`
 
-## API Endpoints
+# Google Drive API Setup Guide
 
-### OAuth 2.1 Authorization Endpoints
-- `GET /.well-known/oauth-authorization-server` - Authorization server metadata (RFC8414)
-- `POST /register` - Dynamic client registration (RFC7591)
-- `GET /authorize` - Authorization endpoint with PKCE support
-- `POST /token` - Token endpoint for authorization code and client credentials grants
+This guide will help you set up Google Drive API credentials for the MCP server.
 
-### Health Check
-- `GET /health` - Returns server health status
+## Step 1: Create Google Cloud Project
 
-### Tool Endpoints (Protected - Requires Authorization)
-All tool endpoints require OAuth 2.1 Bearer token authorization:
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select existing one
+3. Note your project ID
 
-- `POST /tool/create_folder` - Create a new folder
-- `POST /tool/list_directory` - List folder contents
-- `POST /tool/navigate_path` - Navigate to a specific path
-- `POST /tool/read_file` - Read file content
-- `POST /tool/write_file` - Write/create file content
+## Step 2: Enable Google Drive API
 
-### Documentation
-- `GET /` - API information and available endpoints
-- `GET /docs` - Interactive Swagger UI documentation
-- `GET /redoc` - ReDoc documentation
+1. In Google Cloud Console, go to "APIs & Services" → "Library"
+2. Search for "Google Drive API"
+3. Click "Enable"
 
-## Example Usage
+## Step 3: Create OAuth 2.0 Credentials
 
-### OAuth 2.1 Authorization Flow
+### For Development/Testing:
+1. Go to "APIs & Services" → "Credentials"
+2. Click "Create Credentials" → "OAuth 2.0 Client ID"
+3. Choose "Desktop application" 
+4. Name it "MCP Google Drive Client"
+5. Download the JSON file
+6. Rename it to `credentials.json` and place in `gdrive-mcp/` folder
+7. Add Test Users (Important for unverified apps):
+   - Go to APIs & Services → OAuth consent screen → audience → Test users → Add users
+   - Enter your Gmail address (e.g., `your_email@gmail.com`)
+   - Only these users can authenticate during testing
 
-#### 1. Dynamic Client Registration
+### For Production/Server:
+1. Choose "Web application" instead
+2. Add authorized redirect URIs:
+   - `http://localhost:3007/oauth/callback` (for local testing)
+   - Your production callback URL
+3. Download and rename to `credentials.json`
+
+## Step 4: Environment Configuration
+
+Create a `.env` file in `gdrive-mcp/` folder:
+
 ```bash
-curl -X POST "http://localhost:3007/register" \
-     -H "Content-Type: application/json" \
-     -d '{
-       "client_name": "My MCP Client",
-       "redirect_uris": ["http://localhost:3000/callback"],
-       "scope": "gdrive:read gdrive:write"
-     }'
+# Google Drive API Configuration
+GOOGLE_DRIVE_CREDENTIALS=credentials.json
+GOOGLE_DRIVE_TOKEN=token.pickle
+
 ```
 
-#### 2. Authorization Request (PKCE)
+## Step 5: First-Time Authentication
+
+For the first run, you'll need to authenticate:
+
 ```bash
-# First, generate PKCE code verifier and challenge
-code_verifier=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-43)
-code_challenge=$(echo -n $code_verifier | sha256sum | xxd -r -p | base64 | tr -d "=+/" | cut -c1-43)
-
-# Authorization URL (user visits this in browser)
-http://localhost:3007/authorize?client_id=client_abc123&response_type=code&redirect_uri=http://localhost:3000/callback&code_challenge=$code_challenge&code_challenge_method=S256&scope=gdrive:read%20gdrive:write
+python auth_setup.py
 ```
 
-#### 3. Token Exchange
+This will:
+1. Open a browser for OAuth consent
+2. Save refresh token for future use
+3. Test the connection
+
+## Run the server:
+
 ```bash
-curl -X POST "http://localhost:3007/token" \
-     -H "Content-Type: application/json" \
-     -d '{
-       "grant_type": "authorization_code",
-       "code": "auth_code_from_redirect",
-       "redirect_uri": "http://localhost:3000/callback",
-       "client_id": "client_abc123",
-       "code_verifier": "'$code_verifier'"
-     }'
+uv run gdrive_mcp_server.py
 ```
 
-### Tool Usage (With Authorization)
+The MCP server will start using streamable-http transport.
 
-All tool endpoints require a Bearer token in the Authorization header:
+### Available MCP Tools
 
-#### Create Folder
+| Tool Name | Description | Parameters |
+| --------- | ----------- | ---------- |
+| `create_folder` | Create a new folder in Google Drive | `name: str`, `parent_id: str = "root"` |
+| `list_directory` | List contents of a folder | `folder_id: str = "root"`, `max_results: int = 100` |
+| `navigate_path` | Navigate to a specific path in Drive | `path: str` |
+| `write_file` | Write content to a file | `name: str`, `content: str`, `file_id: str`, `parent_id: str = "root"` |
+| `read_file` | Read content from a file | `file_id: str`, `encoding: str = "utf-8"` |
+
+### Testing with Postman
+
+1. Open Postman (latest version with MCP support).
+2. Click New → MCP Request.
+3. Enter the MCP server URL:
+
 ```bash
-curl -X POST "http://localhost:3007/tool/create_folder" \
-     -H "Content-Type: application/json" \
-     -H "Authorization: Bearer your_access_token_here" \
-     -d '{"name": "My New Folder", "parent_id": "root"}'
+http://127.0.0.1:8000/mcp
 ```
 
-#### List Directory
-```bash
-curl -X POST "http://localhost:3007/tool/list_directory" \
-     -H "Content-Type: application/json" \
-     -H "Authorization: Bearer your_access_token_here" \
-     -d '{"folder_id": "root", "max_results": 50}'
-```
+4. Click Connect.
+5. You will now see all available tools (create_folder, list_directory, etc.) listed in the Messages block automatically.
+6. Select a tool and provide input arguments.
+7. Run the request — you will get the live response from Google Drive.
 
-#### Navigate Path
-```bash
-curl -X POST "http://localhost:3007/tool/navigate_path" \
-     -H "Content-Type: application/json" \
-     -H "Authorization: Bearer your_access_token_here" \
-     -d '{"path": "/Documents"}'
-```
+✅ No need to craft raw JSON manually — Postman MCP automatically lists and formats available tools for you.
 
-#### Read File
-```bash
-curl -X POST "http://localhost:3007/tool/read_file" \
-     -H "Content-Type: application/json" \
-     -H "Authorization: Bearer your_access_token_here" \
-     -d '{"file_id": "file1", "encoding": "utf-8"}'
-```
+### Notes
 
-#### Write File
-```bash
-curl -X POST "http://localhost:3007/tool/write_file" \
-     -H "Content-Type: application/json" \
-     -H "Authorization: Bearer your_access_token_here" \
-     -d '{"name": "test.txt", "content": "Hello World!", "parent_id": "root"}'
-```
-
-## Request/Response Format
-
-All tool endpoints return JSON responses with the following structure:
-
-```json
-{
-  "status": "success|error",
-  "data": {
-    // Operation-specific data
-  },
-  "message": "Human-readable status message"
-}
-```
-
-## Mock Data
-
-The server includes mock Google Drive data for testing:
-- Root folder with sample files and folders
-- Realistic file metadata (names, sizes, types)
-- Hierarchical folder structure
-- Sample file content
-
-## Integration with Actual Google Drive API
-
-To replace mock implementations with actual Google Drive API calls:
-
-1. Install Google Drive API dependencies:
-```bash
-pip install google-api-python-client google-auth-oauthlib
-```
-
-2. Set up Google Drive API credentials
-3. Replace methods in the `GoogleDriveTool` class with actual API calls
-4. Update authentication and error handling
-
-The current mock implementation provides the exact interface structure needed for seamless integration.
-
-## Development
-
-### Running in Development Mode
-```bash
-uvicorn gdrive_mcp_tool_server:app --reload --host 0.0.0.0 --port 3007
-```
-
-### Testing
-Visit `http://localhost:3007/docs` for interactive API testing with Swagger UI.
-
-## Architecture
-
-- **GoogleDriveTool**: Core business logic class with methods for each operation
-- **Pydantic Models**: Input validation for all endpoints
-- **FastAPI Endpoints**: HTTP interface with proper error handling
-- **Mock Storage**: In-memory data structure simulating Google Drive hierarchy 
+- Make sure credentials.json is not committed to GitHub.
+- Add credentials.json and token.pickle to .gitignore.
+- If you encounter access_denied errors, ensure your Google Cloud OAuth consent screen has your email as a Test User.
