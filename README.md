@@ -117,6 +117,11 @@ This will:
 ```bash
 uv run gdrive_mcp_server.py
 ```
+By default, the server will run using streamable-http transport at:
+
+```bash
+http://127.0.0.1:8000
+```
 
 The MCP server will start using streamable-http transport.
 
