@@ -44,13 +44,6 @@ venv\Scripts\activate     # Windows
 pip install -r requirements.txt
 ```
 
-4. Run the server:
-```bash
-uv run gdrive_mcp_server.py
-```
-
-The server will start on `http://127.0.0.1:8000`
-
 # Google Drive API Setup Guide
 
 This guide will help you set up Google Drive API credentials for the MCP server.
