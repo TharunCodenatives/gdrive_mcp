@@ -1,5 +1,6 @@
 node_modules/
 build/
+myenv/
 .env
 *.log
 .DS_Store
@@ -10,3 +11,6 @@ db.json
 dailyupdate.md
 credentials.json
 token.pickle
+default_token.pickle
+tokens/
+users.json

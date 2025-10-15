@@ -1,31 +1,17 @@
-#!/usr/bin/env python3
-"""
-Google Drive API Integration for MCP Server
-Real implementation replacing mock responses
-"""
-
-import os
-import pickle
-import io
-import logging
-import base64
-from typing import Dict, Any, Optional
-
+import os, pickle, io, base64, logging
 import pandas as pd
 from pptx import Presentation
 from PyPDF2 import PdfReader
+from docx import Document
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
 from googleapiclient.http import MediaIoBaseUpload, MediaIoBaseDownload
-from reportlab.pdfgen import canvas  # PDF generation
-from google.oauth2.credentials import Credentials
-from docx import Document
+from reportlab.pdfgen import canvas
+from typing import Dict, Any, Optional
 
-# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Extension → MIME type mapping
 EXTENSION_TO_MIME = {
     ".txt": "text/plain",
     ".csv": "text/csv",
@@ -42,52 +28,46 @@ EXTENSION_TO_MIME = {
     ".ipynb": "application/json",
 }
 
-
 class GoogleDriveAPIClient:
-    """
-    Google Drive API client for MCP server
-    Handles authentication and Drive operations
-    """
-
-    def __init__(self, credentials_file: str = "credentials.json", token_file: str = "token.pickle"):
-        self.credentials_file = credentials_file
-        self.token_file = token_file
+    def __init__(self, user_id: str = "default", token_dir: str = "tokens"):
+        self.user_id = user_id
+        self.token_dir = token_dir
+        self.token_file = os.path.join(token_dir, f"{user_id}_token.pickle")
         self.service = None
         self.scopes = [
             'https://www.googleapis.com/auth/drive',
             'https://www.googleapis.com/auth/drive.file'
         ]
 
-    def authenticate(self, user_id: str = "default") -> bool:
-        """Authenticate with Google Drive API"""
+    def authenticate(self) -> bool:
+        """Authenticate Google Drive for given user_id"""
         try:
-            creds = None
-            token_file = f"{user_id}_{self.token_file}"
+            if not os.path.exists(self.token_file):
+                logger.error(f"No token found for {self.user_id}. Run auth_setup.py first.")
+                return False
 
-            if os.path.exists(token_file):
-                with open(token_file, 'rb') as token:
-                    creds = pickle.load(token)
-            elif os.path.exists(self.token_file):
-                with open(self.token_file, 'rb') as token:
-                    creds = pickle.load(token)
+            with open(self.token_file, "rb") as token:
+                creds = pickle.load(token)
 
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
+                with open(self.token_file, "wb") as token_out:
+                    pickle.dump(creds, token_out)
 
             if not creds or not creds.valid:
-                logger.error("No valid credentials found. Provide service account or pre-authorized token.")
+                logger.error("Invalid credentials. Re-run OAuth for user.")
                 return False
 
-            with open(token_file, 'wb') as token:
-                pickle.dump(creds, token)
-
-            self.service = build('drive', 'v3', credentials=creds)
-            logger.info("✅ Successfully authenticated with Google Drive API")
+            self.service = build("drive", "v3", credentials=creds)
+            logger.info(f"✅ Authenticated Google Drive for {self.user_id}")
             return True
-
         except Exception as e:
-            logger.error(f"Authentication failed: {e}")
+            logger.error(f"Auth failed for {self.user_id}: {e}")
             return False
+
+    # 🔽 (keep your create_folder, list_directory, read_file, write_file, etc. methods as before)
+    # Just ensure all methods use `self.service`
+
 
     def _get_mime_type(self, filename: str) -> str:
         """Infer MIME type from extension"""
