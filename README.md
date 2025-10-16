@@ -1,7 +1,7 @@
 # Google Drive MCP Tool Server
 
 This project provides a **Model Context Protocol (MCP)** server for interacting with **Google Drive**.  
-It uses [`fastmcp`](https://github.com/modelcontextprotocol/python-sdk) as the MCP server framework and exposes tools for common Drive operations such as:
+It uses [`fastmcp`](https://pypi.org/project/mcp-server-fastmcp/) as the MCP server framework and exposes tools for common Drive operations such as:
 
 - Creating folders
 - Listing directory contents
@@ -13,7 +13,7 @@ It uses [`fastmcp`](https://github.com/modelcontextprotocol/python-sdk) as the M
 
 - ✅ Create folders inside Google Drive  
 - ✅ List contents of any folder  
-- ✅ Navigate to a path inside Google Drive  
+- ✅ Navigate to a path inside Google Drive 
 - ✅ Read and write files  
 
 ## Python Version Dependencies
@@ -92,28 +92,64 @@ GOOGLE_DRIVE_TOKEN=token.pickle
 
 ```
 
-## Step 5: First-Time Authentication
+## User-to-User Authentication (FastAPI)
+The server includes a FastAPI authentication layer to manage multiple users securely.
 
-For the first run, you'll need to authenticate:
-
+### Start FastAPI Auth Server
 ```bash
 python auth_setup.py
 ```
 
-This will:
-1. Open a browser for OAuth consent
-2. Save refresh token for future use
-3. Test the connection
+Endpoints:
+1. `GET/` → Sample endpoint
+2. `GET/health` → Server status & user count
+3. `POST/auth` → Register or login a user
+
+### Example: Create User
+Send a POST request to `/auth`:
+Request:
+```bash
+{
+  "user_id": "alice",
+  "password": "mypassword123"
+}
+```
+Response:
+```bash
+{
+  "message": "✅ User 'alice' created, Google token saved, and logged in."
+}
+```
+### Example: Login User
+Send a POST request to `/auth`:
+Request:
+```bash
+{
+  "user_id": "alice",
+  "password": "mypassword123"
+}
+```
+Response:
+```bash
+{
+  "message": "✅ Logged in as alice"
+}
+```
+✅ Passwords are hashed with bcrypt
+✅ Google OAuth tokens are stored per user in tokens/<user_id>_token.pickle
+✅ Tokens are auto-refreshed if expired
 
 ## Run the server:
 
 ```bash
 uv run gdrive_mcp_server.py
 ```
-By default, the server will run using streamable-http transport at:
-
+You will be prompted to log in:
 ```bash
-http://127.0.0.1:8000
+Existing users: alice
+Enter user ID: alice
+Enter password: ****
+✅ Logged in as alice
 ```
 
 The MCP server will start using streamable-http transport.
@@ -147,6 +183,6 @@ http://127.0.0.1:8000/mcp
 
 ### Notes
 
-- Make sure credentials.json is not committed to GitHub.
-- Add credentials.json and token.pickle to .gitignore.
-- If you encounter access_denied errors, ensure your Google Cloud OAuth consent screen has your email as a Test User.
+- Do not commit `credentials.json` or user tokens to GitHub.
+- Add `credentials.json` and `tokens/` folder to `.gitignore`.
+- If OAuth fails, delete the user’s token file and re-run `/auth`.
