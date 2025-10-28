@@ -14,7 +14,9 @@ It uses [`fastmcp`](https://github.com/modelcontextprotocol/python-sdk) as the M
 - ✅ Create folders inside Google Drive  
 - ✅ List contents of any folder  
 - ✅ Navigate to a path inside Google Drive  
-- ✅ Read and write files  
+- ✅ Read and write files
+- ✅ Authenticate using service account
+- ✅ Supports Workspace Shared Drives (prod) or Shared Folder workaround (dev/testing)
 
 ## Python Version Dependencies
 
@@ -44,9 +46,7 @@ venv\Scripts\activate     # Windows
 pip install -r requirements.txt
 ```
 
-# Google Drive API Setup Guide
-
-This guide will help you set up Google Drive API credentials for the MCP server.
+# Google Drive Service Account Setup
 
 ## Step 1: Create Google Cloud Project
 
@@ -60,52 +60,60 @@ This guide will help you set up Google Drive API credentials for the MCP server.
 2. Search for "Google Drive API"
 3. Click "Enable"
 
-## Step 3: Create OAuth 2.0 Credentials
+## Step 3: Create Service Account
 
-### For Development/Testing:
-1. Go to "APIs & Services" → "Credentials"
-2. Click "Create Credentials" → "OAuth 2.0 Client ID"
-3. Choose "Desktop application" 
-4. Name it "MCP Google Drive Client"
-5. Download the JSON file
-6. Rename it to `credentials.json` and place in `gdrive-mcp/` folder
-7. Add Test Users (Important for unverified apps):
-   - Go to APIs & Services → OAuth consent screen → audience → Test users → Add users
-   - Enter your Gmail address (e.g., `your_email@gmail.com`)
-   - Only these users can authenticate during testing
+1. Go to IAM & Admin → Service Accounts
+2. Click Create Service Account
+3. Enter a name, e.g., mcp-drive-sa
+4. Assign Editor or Drive Admin role (depending on needs)
+5. Click Done
 
-### For Production/Server:
-1. Choose "Web application" instead
-2. Add authorized redirect URIs:
-   - `http://localhost:3007/oauth/callback` (for local testing)
-   - Your production callback URL
-3. Download and rename to `credentials.json`
+## Step 4: Create Service Account Key
 
-## Step 4: Environment Configuration
+1. Click the created service account → Keys → Add Key → Create New Key
+2. Choose JSON
+3. Download the JSON file
+4. Rename it to service_account.json and place in the gdrive-mcp/ folder
 
-Create a `.env` file in `gdrive-mcp/` folder:
+# Providing Drive Access to Service Account
+Service accounts do not have their own Drive unless it’s a Workspace account. You have two options:
 
-```bash
-# Google Drive API Configuration
-GOOGLE_DRIVE_CREDENTIALS=credentials.json
-GOOGLE_DRIVE_TOKEN=token.pickle
+## Option 1: Workspace Shared Drive (Recommended for Prod)
 
-```
-
-## Step 5: First-Time Authentication
-
-For the first run, you'll need to authenticate:
+1. Sign in to your Google Workspace account (e.g., yourname@company.com)
+2. Go to [Shared Drives](https://drive.google.com/drive/u/0/shared-drives)
+3. Create a new Shared Drive or select an existing one
+4. Go to Manage Members → Add your service account email with Editor permissions
+5. Note the Shared Drive ID and add it to your .env (you can hardcode this ID for prod):
 
 ```bash
-python auth_setup.py
+DEFAULT_SHARED_FOLDER_ID=<shared_drive_id>
 ```
+✅ This is production-ready and preferred because the service account can access the drive independently.
 
-This will:
-1. Open a browser for OAuth consent
-2. Save refresh token for future use
-3. Test the connection
+## Option 2: Shared Folder Workaround (Personal Drive, Testing Only)
 
-## Run the server:
+1. Go to your My Drive
+2. Create a new folder, e.g., `MCP_Test`
+3. Right-click → Share → Add your service account email with Editor permissions
+4. Note the Folder ID and add it to your `.env`:
+
+```bash
+DEFAULT_SHARED_FOLDER_ID=<shared_folder_id>
+```
+⚠️ This approach is not recommended for production, as it depends on a personal account and folder ID must be hardcoded per environment.
+
+# Environment Configuration (.env)
+```bash
+# Google Drive Service Account JSON
+GOOGLE_DRIVE_SERVICE_ACCOUNT=service_account.json
+
+# Default folder / Shared Drive ID
+DEFAULT_SHARED_FOLDER_ID=<folder_or_drive_id>
+```
+No OAuth token file (token.pickle) is required — service account handles authentication automatically.
+
+# Running the MCP Server:
 
 ```bash
 uv run gdrive_mcp_server.py
@@ -147,6 +155,7 @@ http://127.0.0.1:8000/mcp
 
 ### Notes
 
-- Make sure credentials.json is not committed to GitHub.
-- Add credentials.json and token.pickle to .gitignore.
-- If you encounter access_denied errors, ensure your Google Cloud OAuth consent screen has your email as a Test User.
+- Do not commit service_account.json or .env to GitHub
+- Workspace Shared Drive ID can be hardcoded for production
+- Personal Drive shared folder is only for testing
+- Ensure the shared folder or Shared Drive is shared with the service account email
